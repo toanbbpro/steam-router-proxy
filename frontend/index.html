@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Steam Router Proxy v0.2.2</title>
+    <style>
+        body { font-family: "Segoe UI", Arial, sans-serif; background: #1b2838; color: #fff; display: flex; justify-content: center; padding-top: 20px; margin: 0; user-select: none; }
+        .card { background: #2a475e; padding: 20px; border-radius: 8px; width: 340px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        h2 { text-align: center; margin-top: 0; margin-bottom: 5px; color: #66c0f4; font-size: 20px; }
+        .version { text-align: center; font-size: 11px; color: #8f98a0; margin-bottom: 15px; }
+        .status-badge { background: #4c6b22; color: #a4d007; text-align: center; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-bottom: 15px; }
+        
+        .row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin-bottom: 12px; }
+        .service-group { display: flex; gap: 8px; border-top: 1px solid #3c5a75; padding-top: 15px; }
+        
+        button { background: #3c5a75; border: none; color: #fff; padding: 8px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 12px; }
+        button:hover { background: #4a7092; }
+        .btn-install { background: #66c0f4; color: #1b2838; flex: 1; }
+        .btn-install:hover { background: #71d5ff; }
+        .btn-uninstall { background: #a84343; flex: 1; }
+        .btn-uninstall:hover { background: #c04d4d; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Steam Router Proxy</h2>
+        <div class="version">Phiên bản v0.2.2</div>
+        
+        <div class="status-badge">● Dịch vụ Proxy đang hoạt động</div>
+
+        <!-- Quản lý Ghi Log -->
+        <div class="row">
+            <label><input type="checkbox" id="enableLog" onchange="toggleLog(this)"> Ghi file Log</label>
+            <button onclick="openLogFolder()">Mở Thư Mục</button>
+        </div>
+
+        <!-- Quản lý Windows Service ngầm -->
+        <div class="service-group">
+            <button class="btn-install" onclick="manageService('install')">Cài như Service </button>
+            <button class="btn-uninstall" onclick="manageService('uninstall')">Gỡ Service</button>
+        </div>
+    </div>
+
+    <script>
+        async function toggleLog(checkbox) {
+            let res = await window.go.main.App.ToggleLogging(checkbox.checked);
+            console.log(res);
+        }
+
+        async function manageService(action) {
+            let res = await window.go.main.App.ManageService(action);
+            alert(res);
+        }
+
+        function openLogFolder() {
+            window.go.main.App.OpenLogFolder();
+        }
+    </script>
+</body>
+</html>

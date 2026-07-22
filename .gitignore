@@ -1,0 +1,17 @@
+# Binary & Build outputs
+build/bin/
+*.exe
+*.dll
+
+# Logs
+logs/
+*.log
+
+# Wails temporary files
+.wails/
+
+# Node dependencies & IDEs
+frontend/node_modules/
+frontend/dist/
+.vscode/
+.idea/
