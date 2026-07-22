@@ -1,19 +1,5 @@
 # README
 
-## About
-
-This is the official Wails Vanilla template.
-
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
-
-## Live Development
-
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
-
-## Building
-
-To build a redistributable, production mode package, use `wails build`.
+I made this to fix my problem when play CS2 game, but Steam client verylag or can't connect.
+If i use 1.1.1.1 with WARP, Steam good, but CS2 game lag or disconnected.
+So this is vibe coding with Gemini to fix that problem. After use my app. Steam client ok and no affect game connect.
