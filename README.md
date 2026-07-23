@@ -37,7 +37,7 @@ So this was built with Gemini to fix that issue. After running this app, the Ste
 ### 📸 Screenshot
 
 <div align="center">
-  <img width="480" src="https://github.com/user-attachments/assets/c6d87cdd-e792-4e23-bb34-fd7087893262" alt="Steam Router Proxy v0.3 UI" >
+  <img width="702" height="531" src="https://github.com/user-attachments/assets/571e3c4a-6787-4439-bda5-389ac451a06d" alt="Steam Router Proxy v0.3 UI" >
 </div>
 
 ---
