@@ -2,58 +2,268 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Steam Router Proxy v0.2.2</title>
+    <title>Steam Router Proxy v0.3</title>
     <style>
-        body { font-family: "Segoe UI", Arial, sans-serif; background: #1b2838; color: #fff; display: flex; justify-content: center; padding-top: 20px; margin: 0; user-select: none; }
-        .card { background: #2a475e; padding: 20px; border-radius: 8px; width: 340px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-        h2 { text-align: center; margin-top: 0; margin-bottom: 5px; color: #66c0f4; font-size: 20px; }
-        .version { text-align: center; font-size: 11px; color: #8f98a0; margin-bottom: 15px; }
-        .status-badge { background: #4c6b22; color: #a4d007; text-align: center; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-bottom: 15px; }
+        body { 
+            font-family: "Segoe UI", Arial, sans-serif; 
+            background: #1b2838; 
+            color: #fff; 
+            display: flex; 
+            justify-content: center; 
+            padding-top: 15px; 
+            margin: 0; 
+            user-select: none; 
+            overflow: hidden; 
+        }
+        .card { 
+            background: #2a475e; 
+            padding: 20px; 
+            border-radius: 8px; 
+            width: 400px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); 
+            position: relative; 
+        }
         
-        .row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin-bottom: 12px; }
-        .service-group { display: flex; gap: 8px; border-top: 1px solid #3c5a75; padding-top: 15px; }
+        /* Language Switcher */
+        .lang-switch { 
+            position: absolute; 
+            top: 15px; 
+            right: 20px; 
+        }
+        .lang-flag-btn { 
+            background: #1b2838; 
+            border: 1px solid #3c5a75; 
+            padding: 5px 8px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .lang-flag-btn svg {
+            width: 22px;
+            height: 15px;
+            border-radius: 2px;
+            display: block;
+        }
+        .lang-flag-btn:hover { 
+            background: #2a475e; 
+            border-color: #66c0f4;
+            transform: scale(1.08);
+        }
+        .lang-flag-btn:active {
+            transform: scale(0.95);
+        }
         
-        button { background: #3c5a75; border: none; color: #fff; padding: 8px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 12px; }
-        button:hover { background: #4a7092; }
+        /* Tăng margin-bottom để bù vào khoảng trống của dòng version cũ */
+        h2 { text-align: center; margin-top: 0px; margin-bottom: 20px; color: #66c0f4; font-size: 22px; }
+        
+        .status-badge { background: #4c6b22; color: #a4d007; text-align: center; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-bottom: 16px; }
+        
+        .row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 5px; margin-bottom: 12px; }
+        .service-group { display: flex; gap: 10px; border-top: 1px solid #3c5a75; padding-top: 15px; }
+        
+        .btn-action { background: #3c5a75; border: none; color: #fff; padding: 10px 14px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        .btn-action:hover { background: #4a7092; }
         .btn-install { background: #66c0f4; color: #1b2838; flex: 1; }
         .btn-install:hover { background: #71d5ff; }
         .btn-uninstall { background: #a84343; flex: 1; }
         .btn-uninstall:hover { background: #c04d4d; }
+
+        /* Footer Link Trang Chủ */
+        .footer-link {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 11px;
+        }
+        .footer-link a {
+            color: #8f98a0;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .footer-link a:hover {
+            color: #66c0f4;
+            text-decoration: underline;
+        }
+
+        /* CUSTOM MODAL POPUP */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            backdrop-filter: blur(3px);
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+        .modal-overlay.hidden {
+            display: none;
+            opacity: 0;
+        }
+        .modal-box {
+            background: #1b2838;
+            border: 1px solid #66c0f4;
+            border-radius: 8px;
+            width: 320px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        }
+        .modal-title {
+            color: #66c0f4;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .modal-body {
+            font-size: 13px;
+            color: #c6d4df;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .btn-modal-close {
+            background: #66c0f4;
+            color: #1b2838;
+            width: 100%;
+            padding: 8px 0;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-modal-close:hover {
+            background: #71d5ff;
+        }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>Steam Router Proxy</h2>
-        <div class="version">Phiên bản v0.2.2</div>
-        
-        <div class="status-badge">● Dịch vụ Proxy đang hoạt động</div>
-
-        <!-- Quản lý Ghi Log -->
-        <div class="row">
-            <label><input type="checkbox" id="enableLog" onchange="toggleLog(this)"> Ghi file Log</label>
-            <button onclick="openLogFolder()">Mở Thư Mục</button>
+        <!-- Nút Chuyển Ngôn Ngữ -->
+        <div class="lang-switch">
+            <button class="lang-flag-btn" id="btn-lang-toggle" onclick="toggleLanguage()"></button>
         </div>
 
-        <!-- Quản lý Windows Service ngầm -->
+        <h2 id="lbl_title">Steam Router Proxy</h2>
+        
+        <div class="status-badge" id="lbl_status">● Dịch vụ Proxy đang hoạt động</div>
+
+        <div class="row">
+            <label><input type="checkbox" id="enableLog" onchange="toggleLog(this)"> <span id="lbl_log">Ghi file Log</span></label>
+            <button class="btn-action" onclick="openLogFolder()" id="btn_open_log">Mở Thư Mục</button>
+        </div>
+
         <div class="service-group">
-            <button class="btn-install" onclick="manageService('install')">Cài như Service </button>
-            <button class="btn-uninstall" onclick="manageService('uninstall')">Gỡ Service</button>
+            <button class="btn-action btn-install" onclick="manageService('install')" id="btn_install">Cài Service Tự Khởi Động</button>
+            <button class="btn-action btn-uninstall" onclick="manageService('uninstall')" id="btn_uninstall">Gỡ Service</button>
+        </div>
+
+        <!-- Link Trang Chủ GitHub -->
+        <div class="footer-link">
+            <a href="#" onclick="openHomePage()" id="lbl_homepage">Trang chủ (GitHub)</a>
+        </div>
+    </div>
+
+    <!-- HỘP THOẠI MODAL -->
+    <div id="custom-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-title" id="lbl_modal_title">Thông Báo</div>
+            <div class="modal-body" id="lbl_modal_msg">...</div>
+            <button class="btn-modal-close" onclick="closeModal()">OK</button>
         </div>
     </div>
 
     <script>
+        const flags = {
+            vi: `<svg viewBox="0 0 900 600"><rect width="900" height="600" fill="#da251d"/><polygon points="450,150 488,268 612,268 512,341 550,459 450,386 350,459 388,341 288,268 412,268" fill="#ffff00"/></svg>`,
+            en: `<svg viewBox="0 0 741 390"><rect width="741" height="390" fill="#b22234"/><path d="M0,30H741M0,90H741M0,150H741M0,210H741M0,270H741M0,330H741" stroke="#fff" stroke-width="30"/><rect width="296.4" height="210" fill="#3c3b6e"/></svg>`
+        };
+
+        const i18n = {
+            vi: {
+                title: "Steam Router Proxy",
+                status: "● Dịch vụ Proxy đang hoạt động",
+                log: "Ghi file Log",
+                open_log: "Mở Thư Mục",
+                install: "Cài Service Tự Khởi Động",
+                uninstall: "Gỡ Service",
+                modal_title: "Thông Báo",
+                homepage: "Trang chủ (GitHub)"
+            },
+            en: {
+                title: "Steam Router Proxy",
+                status: "● Proxy Service is Running",
+                log: "Enable Logging",
+                open_log: "Open Folder",
+                install: "Install Auto-Start Service",
+                uninstall: "Uninstall Service",
+                modal_title: "Notification",
+                homepage: "Homepage (GitHub)"
+            }
+        };
+
+        function toggleLanguage() {
+            let currentLang = localStorage.getItem("appLang") || "vi";
+            let nextLang = currentLang === "vi" ? "en" : "vi";
+            setLanguage(nextLang);
+        }
+
+        function setLanguage(lang) {
+            localStorage.setItem("appLang", lang);
+            
+            document.getElementById("lbl_title").innerText = i18n[lang].title;
+            document.getElementById("lbl_status").innerText = i18n[lang].status;
+            document.getElementById("lbl_log").innerText = i18n[lang].log;
+            document.getElementById("btn_open_log").innerText = i18n[lang].open_log;
+            document.getElementById("btn_install").innerText = i18n[lang].install;
+            document.getElementById("btn_uninstall").innerText = i18n[lang].uninstall;
+            document.getElementById("lbl_modal_title").innerText = i18n[lang].modal_title;
+            document.getElementById("lbl_homepage").innerText = i18n[lang].homepage;
+
+            let btnToggle = document.getElementById("btn-lang-toggle");
+            if (lang === "vi") {
+                btnToggle.innerHTML = flags.en;
+                btnToggle.title = "Switch to English";
+            } else {
+                btnToggle.innerHTML = flags.vi;
+                btnToggle.title = "Chuyển sang Tiếng Việt";
+            }
+        }
+
+        window.onload = () => {
+            let savedLang = localStorage.getItem("appLang") || "vi";
+            setLanguage(savedLang);
+        };
+
+        function showModal(msg) {
+            let formattedMsg = msg.replace(" / ", "<br>");
+            document.getElementById("lbl_modal_msg").innerHTML = formattedMsg;
+            document.getElementById("custom-modal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("custom-modal").classList.add("hidden");
+        }
+
         async function toggleLog(checkbox) {
-            let res = await window.go.main.App.ToggleLogging(checkbox.checked);
-            console.log(res);
+            await window.go.main.App.ToggleLogging(checkbox.checked);
         }
 
         async function manageService(action) {
             let res = await window.go.main.App.ManageService(action);
-            alert(res);
+            showModal(res);
         }
 
         function openLogFolder() {
             window.go.main.App.OpenLogFolder();
+        }
+
+        function openHomePage() {
+            window.go.main.App.OpenHomePage();
         }
     </script>
 </body>

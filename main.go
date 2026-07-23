@@ -47,12 +47,25 @@ func elevate() {
 
 	err := windows.ShellExecute(0, verb, exePtr, argPtr, cwdPtr, windows.SW_NORMAL)
 	if err != nil {
-		log.Fatalf("Không thể mở ứng dụng với quyền Admin: %v", err)
+		log.Fatalf("Không thể mở ứng dụng quyền Admin / Cannot run as Admin: %v", err)
 	}
 	os.Exit(0)
 }
 
-// Logic thực thi khi ứng dụng chạy dưới dạng Windows Service ngầm
+// FIX: Hàm kiểm tra xem Windows Service của app có đang hoạt động không
+func IsServiceRunning() bool {
+	svcConfig := &service.Config{Name: "SteamRouterService"}
+	s, err := service.New(&program{}, svcConfig)
+	if err != nil {
+		return false
+	}
+	status, err := s.Status()
+	if err != nil {
+		return false
+	}
+	return status == service.StatusRunning
+}
+
 type program struct{}
 
 func (p *program) Start(s service.Service) error {
@@ -75,12 +88,9 @@ func main() {
 		return
 	}
 
-	// Trường hợp khởi chạy bởi Windows Service Manager
 	if len(os.Args) > 1 && os.Args[1] == "-service" {
 		svcConfig := &service.Config{
-			Name:        "SteamRouterService",
-			DisplayName: "Steam Network Router Service",
-			Description: "Dịch vụ chạy ngầm tự động định tuyến và tăng tốc kết nối Steam.",
+			Name: "SteamRouterService",
 		}
 		prg := &program{}
 		s, err := service.New(prg, svcConfig)
@@ -91,22 +101,24 @@ func main() {
 		return
 	}
 
-	// Trường hợp người dùng mở giao diện Wails GUI
 	app := NewApp()
 
 	err := wails.Run(&options.App{
-		Title:  "Steam Network Router",
-		Width:  420,
-		Height: 280, // Tối ưu kích thước giao diện gọn hơn
+		Title:  "Steam Router Proxy v0.3",
+		Width:  480, // TĂNG KÍCH THƯỚC: Mở rộng chiều ngang
+		Height: 360, // TĂNG TỪ 320 LÊN 360: Giúp hiển thị thoải mái không lo bị cấn
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 40, B: 56, A: 1},
 		OnStartup:        app.startup,
 		OnShutdown: func(ctx context.Context) {
-			// Tự động dọn dẹp khi đóng cửa sổ GUI
-			stopProxy()
-			updateHosts(false)
+			// FIX: Chỉ khôi phục cài đặt nếu Service KHÔNG chạy
+			// Nếu Service đang chạy thì im lặng đóng app, nhường service lo liệu
+			if !IsServiceRunning() {
+				stopProxy()
+				updateHosts(false)
+			}
 		},
 		Bind: []interface{}{
 			app,

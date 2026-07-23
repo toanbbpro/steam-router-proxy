@@ -1,13 +1,20 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "SteamRouterGUI",
-  "outputfilename": "SteamRouterGUI",
+  "name": "Steam Router Proxy",
+  "outputfilename": "steam-router-proxy.exe",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "",
+    "name": "ToànBB",
     "email": ""
+  },
+  "info": {
+    "companyName": "ToànBB",
+    "productName": "Steam Router Proxy",
+    "productVersion": "0.3.0.0",
+    "copyright": "Copyright © 2026 ToànBB",
+    "comments": "Steam Network Router Proxy Application"
   }
 }

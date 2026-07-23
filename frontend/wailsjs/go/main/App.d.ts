@@ -3,6 +3,8 @@
 
 export function ManageService(arg1:string):Promise<string>;
 
+export function OpenHomePage():Promise<void>;
+
 export function OpenLogFolder():Promise<void>;
 
 export function ToggleLogging(arg1:boolean):Promise<string>;

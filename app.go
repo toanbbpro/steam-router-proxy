@@ -38,32 +38,33 @@ func NewApp() *App {
 	return &App{}
 }
 
-// Khi GUI mở lên -> Tự động khởi chạy Proxy ngay lập tức
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	log.SetOutput(io.Discard) // Mặc định không ghi log
-	if err := updateHosts(true); err == nil {
-		go runProxy()
+	log.SetOutput(io.Discard)
+
+	// FIX: Nếu Service đang chạy, App GUI không bật Proxy cục bộ để tránh xung đột Port
+	if !IsServiceRunning() {
+		if err := updateHosts(true); err == nil {
+			go runProxy()
+		}
 	}
 }
 
-// Bật/Tắt Ghi Log từ Frontend
 func (a *App) ToggleLogging(enable bool) string {
 	a.logging = enable
 	if enable {
 		exePath, _ := os.Executable()
 		logDir := filepath.Join(filepath.Dir(exePath), "logs")
-		rotator := &LogRotator{LogDir: logDir, MaxSize: 8 * 1024 * 1024} // 8MB
+		rotator := &LogRotator{LogDir: logDir, MaxSize: 8 * 1024 * 1024}
 		log.SetOutput(rotator)
-		log.Println("[INIT] --- Bắt đầu ghi log phiên làm việc ---")
-		return "Đã bật ghi Log."
+		log.Println("[INIT] --- Bắt đầu ghi log / Start logging ---")
+		return "Đã bật ghi Log / Logging enabled."
 	} else {
 		log.SetOutput(io.Discard)
-		return "Đã tắt ghi Log."
+		return "Đã tắt ghi Log / Logging disabled."
 	}
 }
 
-// Quản lý Windows Service chạy ngầm
 func (a *App) ManageService(action string) string {
 	exePath, _ := os.Executable()
 	svcConfig := &service.Config{
@@ -73,36 +74,42 @@ func (a *App) ManageService(action string) string {
 		Executable:  exePath,
 		Arguments:   []string{"-service"},
 		Option: service.KeyValue{
-			"StartType": "automatic", // Tự động chạy cùng Windows
+			"StartType": "automatic",
 		},
 	}
 	s, err := service.New(&program{}, svcConfig)
 	if err != nil {
-		return "Lỗi khởi tạo Service: " + err.Error()
+		return "Lỗi khởi tạo / Init error: " + err.Error()
 	}
 
 	switch action {
 	case "install":
+		// FIX: Tắt Proxy của GUI trước khi nhường Port 443 cho Service
+		stopProxy()
+
 		_ = service.Control(s, "stop")
 		_ = service.Control(s, "uninstall")
 		if err := service.Control(s, "install"); err != nil {
-			return "Lỗi cài đặt Service: " + err.Error()
+			go runProxy() // Bật lại GUI proxy nếu lỗi
+			return "Lỗi cài đặt / Install error: " + err.Error()
 		}
 		if err := service.Control(s, "start"); err != nil {
-			return "Đã cài Service nhưng chưa bật được: " + err.Error()
+			return "Lỗi khởi chạy / Start error: " + err.Error()
 		}
-		return "Đã cài đặt & kích hoạt Service tự chạy cùng Windows!"
+		return "Thành công: Đã cài Service ngầm! / Success: Service installed!"
 	case "uninstall":
 		_ = service.Control(s, "stop")
 		if err := service.Control(s, "uninstall"); err != nil {
-			return "Lỗi gỡ cài đặt: " + err.Error()
+			return "Lỗi gỡ cài đặt / Uninstall error: " + err.Error()
 		}
-		return "Đã gỡ bỏ Service khỏi hệ thống."
+		// FIX: Lấy lại quyền chạy Proxy về cho GUI sau khi gỡ Service
+		updateHosts(true)
+		go runProxy()
+		return "Thành công: Đã gỡ Service! / Success: Service uninstalled!"
 	}
-	return "Lệnh không hợp lệ."
+	return "Lệnh không hợp lệ / Invalid action."
 }
 
-// Mở thư mục chứa File Log
 func (a *App) OpenLogFolder() {
 	exePath, _ := os.Executable()
 	logDir := filepath.Join(filepath.Dir(exePath), "logs")
@@ -118,10 +125,10 @@ func runProxy() {
 	var err error
 	coreListener, err = net.Listen("tcp", "127.0.0.1:443")
 	if err != nil {
-		log.Println("[ERROR] Port 443 đã bị chiếm dụng hoặc không đủ quyền:", err)
+		log.Println("[ERROR] Port 443 đã bị chiếm / Port in use:", err)
 		return
 	}
-	log.Println("[+] Steam Router Proxy đang hoạt động tại 127.0.0.1:443")
+	log.Println("[+] Proxy đang hoạt động / Proxy running at 127.0.0.1:443")
 
 	for {
 		conn, err := coreListener.Accept()
@@ -155,24 +162,16 @@ func handleConnection(clientConn net.Conn) {
 		host = "steamcommunity.com"
 	}
 
-	log.Printf("[REQ] Yêu cầu kết nối Domain: %s", host)
-
 	targetIP, err := resolveDoH(host)
 	if err != nil || targetIP == "" {
-		log.Printf("[ERR] DoH Phân giải thất bại: %s (%v)", host, err)
 		return
 	}
-
-	log.Printf("[DOH] Phân giải thành công: %s => %s", host, targetIP)
 
 	targetConn, err := net.DialTimeout("tcp", net.JoinHostPort(targetIP, "443"), 5*time.Second)
 	if err != nil {
-		log.Printf("[ERR] Không thể kết nối IP mục tiêu: %s (%s)", host, targetIP)
 		return
 	}
 	defer targetConn.Close()
-
-	log.Printf("[OK] Đang chuyển tiếp dữ liệu: %s", host)
 
 	targetConn.Write(buf[:1])
 	time.Sleep(3 * time.Millisecond)
@@ -228,6 +227,7 @@ func parseSNI(data []byte) string {
 	return ""
 }
 
+// FIX: Hàm updateHosts chống trùng lặp dữ liệu
 func updateHosts(add bool) error {
 	content, err := os.ReadFile(hostsPath)
 	if err != nil {
@@ -240,6 +240,7 @@ func updateHosts(add bool) error {
 	var newLines []string
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
+		// Lọc bỏ 100% các dòng cũ do app tạo ra để tránh trùng lặp
 		if !strings.Contains(trimmed, "# SteamRouter") && trimmed != "" {
 			newLines = append(newLines, line)
 		}
@@ -256,10 +257,6 @@ func updateHosts(add bool) error {
 	exec.Command("ipconfig", "/flushdns").Run()
 	return err
 }
-
-// -----------------------------------------
-// CUSTOM LOG ROTATOR (File proxy-log-timestamp.log)
-// -----------------------------------------
 
 type LogRotator struct {
 	LogDir  string
@@ -304,4 +301,9 @@ func (r *LogRotator) openNew() error {
 	r.file = f
 	r.size = 0
 	return nil
+}
+
+// Mở trang chủ GitHub của dự án
+func (a *App) OpenHomePage() {
+	exec.Command("cmd", "/c", "start", "https://github.com/toanbbpro/steam-router-proxy").Start()
 }

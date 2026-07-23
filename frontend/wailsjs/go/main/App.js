@@ -6,6 +6,10 @@ export function ManageService(arg1) {
   return window['go']['main']['App']['ManageService'](arg1);
 }
 
+export function OpenHomePage() {
+  return window['go']['main']['App']['OpenHomePage']();
+}
+
 export function OpenLogFolder() {
   return window['go']['main']['App']['OpenLogFolder']();
 }
