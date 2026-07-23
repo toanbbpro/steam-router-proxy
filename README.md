@@ -6,7 +6,7 @@ So this is vibe coding with Gemini to fix that problem. After use my app. Steam 
 
 <div align="center">
 
-# 🚀 Steam Network Router Proxy
+# 🚀 Steam Router Proxy
 
 **Tăng tốc kết nối & mở khóa dịch vụ Steam tự động cho Windows**  
 *Accelerate and seamlessly unblock Steam network services on Windows.*
