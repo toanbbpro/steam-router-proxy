@@ -1,8 +1,8 @@
 # README
 
-Ứng dụng này được phát triển nhằm giải quyết triệt để sự cố khi chơi game CS2: Client Steam bị giật lag hoặc không thể kết nối.
+Ứng dụng này được phát triển nhằm giải quyết triệt để sự cố khi chơi game CS2, Steam Client bị giật lag hoặc không thể kết nối.
 Nếu sử dụng 1.1.1.1 WARP, Steam hoạt động tốt nhưng CS2 lại bị gián đoạn hoặc giật lag.
-Vì vậy, công cụ này ra đời (vibe coding cùng Gemini) để khắc phục tình trạng trên. Sau khi sử dụng, Steam Client hoạt động mượt mà và hoàn toàn không ảnh hưởng tới kết nối trong game.
+Vì vậy, công cụ này ra đời (vibe coding cùng Gemini 3.6) để khắc phục tình trạng trên. Sau khi sử dụng, Steam Client hoạt động mượt mà và hoàn toàn không ảnh hưởng tới kết nối trong game.
 
 <div align="center">
 
