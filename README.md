@@ -2,7 +2,7 @@
 
 I made this to fix my problem when playing CS2—where the Steam client was extremely laggy or failed to connect entirely.
 If I used 1.1.1.1 with WARP, Steam worked well, but CS2 suffered from high latency or disconnections.
-So this was built with Gemini to fix that issue. After running this app, the Steam client connects smoothly without impacting in-game network stability.
+So this was vibecode with Gemini 3.6 to fix that issue. After running this app, the Steam client connects smoothly without impacting in-game network stability.
 
 <div align="center">
 
